@@ -5,32 +5,117 @@
 #include "ImGui/imgui_impl_win32.h"
 #include "ImGui/imgui_impl_dx11.h"
 #include <d3d11.h>
+#include <dxgi1_2.h>
+#include <dxgi1_5.h>
 #include <chrono>
 
 // Direct3D 设备创建
 bool CreateDeviceD3D(HWND hWnd) {
-    // 设置交换链
-    DXGI_SWAP_CHAIN_DESC sd;
-    ZeroMemory(&sd, sizeof(sd));
-    sd.BufferCount = 2;
-    sd.BufferDesc.Width = 0;
-    sd.BufferDesc.Height = 0;
-    sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-    sd.BufferDesc.RefreshRate.Numerator = 60;
-    sd.BufferDesc.RefreshRate.Denominator = 1;
-    sd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
-    sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-    sd.OutputWindow = hWnd;
-    sd.SampleDesc.Count = 1;
-    sd.SampleDesc.Quality = 0;
-    sd.Windowed = TRUE;
-    sd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
-
-    UINT createDeviceFlags = 0;
+    // 创建 D3D11 设备与上下文
+    UINT createDeviceFlags = D3D11_CREATE_DEVICE_SINGLETHREADED;
     D3D_FEATURE_LEVEL featureLevel;
     const D3D_FEATURE_LEVEL featureLevelArray[2] = { D3D_FEATURE_LEVEL_11_0, D3D_FEATURE_LEVEL_10_0, };
-    if (D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, createDeviceFlags, featureLevelArray, 2, D3D11_SDK_VERSION, &sd, &g_pSwapChain, &g_pd3dDevice, &featureLevel, &g_pd3dDeviceContext) != S_OK)
+    if (D3D11CreateDevice(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, createDeviceFlags,
+                          featureLevelArray, 2, D3D11_SDK_VERSION,
+                          &g_pd3dDevice, &featureLevel, &g_pd3dDeviceContext) != S_OK) {
         return false;
+    }
+
+    // 若窗口为层叠(WS_EX_LAYERED)，避免使用 FLIP 交换链（会破坏透明），直接走旧模型
+    bool isLayered = (GetWindowLongPtr(hWnd, GWL_EXSTYLE) & WS_EX_LAYERED) != 0;
+
+    // 优先在非层叠窗口上尝试创建 FLIP 模式交换链并启用帧等待对象
+    if (!isLayered) {
+        IDXGIDevice* dxgiDevice = nullptr;
+        if (SUCCEEDED(g_pd3dDevice->QueryInterface(__uuidof(IDXGIDevice), (void**)&dxgiDevice))) {
+            IDXGIAdapter* adapter = nullptr;
+            if (SUCCEEDED(dxgiDevice->GetAdapter(&adapter))) {
+                IDXGIFactory2* factory2 = nullptr;
+                if (SUCCEEDED(adapter->GetParent(__uuidof(IDXGIFactory2), (void**)&factory2))) {
+                    DXGI_SWAP_CHAIN_DESC1 desc1 = {};
+                    desc1.Width = 0; desc1.Height = 0;
+                    desc1.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+                    desc1.SampleDesc.Count = 1; desc1.SampleDesc.Quality = 0;
+                    desc1.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+                    desc1.BufferCount = 3; // 三缓冲以提升平滑度
+                    desc1.Scaling = DXGI_SCALING_STRETCH;
+                    desc1.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+                    desc1.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
+                    desc1.Flags = DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
+
+                    // 检测是否支持撕裂呈现
+                    BOOL allowTearing = FALSE;
+                    IDXGIFactory5* factory5 = nullptr;
+                    if (SUCCEEDED(factory2->QueryInterface(__uuidof(IDXGIFactory5), (void**)&factory5))) {
+                        factory5->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &allowTearing, sizeof(allowTearing));
+                        if (allowTearing) {
+                            desc1.Flags |= DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
+                            g_dxgiAllowTearing = true;
+                        }
+                        factory5->Release();
+                    }
+
+                    IDXGISwapChain1* swap1 = nullptr;
+                    if (SUCCEEDED(factory2->CreateSwapChainForHwnd(g_pd3dDevice, hWnd, &desc1, nullptr, nullptr, &swap1))) {
+                        swap1->QueryInterface(__uuidof(IDXGISwapChain), (void**)&g_pSwapChain);
+                        IDXGISwapChain2* swap2 = nullptr;
+                        if (SUCCEEDED(swap1->QueryInterface(__uuidof(IDXGISwapChain2), (void**)&swap2))) {
+                            IDXGIDevice1* dxgiDev1 = nullptr;
+                            if (SUCCEEDED(g_pd3dDevice->QueryInterface(__uuidof(IDXGIDevice1), (void**)&dxgiDev1))) {
+                                dxgiDev1->SetMaximumFrameLatency(1);
+                                dxgiDev1->Release();
+                            }
+                            g_frameLatencyWaitableObject = swap2->GetFrameLatencyWaitableObject();
+                            swap2->Release();
+                        }
+                        swap1->Release();
+                    }
+                    factory2->Release();
+                }
+                adapter->Release();
+            }
+            dxgiDevice->Release();
+        }
+    }
+
+    // 若 FLIP 模式创建失败，退回传统交换链
+    if (!g_pSwapChain) {
+        DXGI_SWAP_CHAIN_DESC sd = {};
+        sd.BufferCount = 2;
+        sd.BufferDesc.Width = 0;
+        sd.BufferDesc.Height = 0;
+        sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        sd.BufferDesc.RefreshRate.Numerator = 60;
+        sd.BufferDesc.RefreshRate.Denominator = 1;
+        sd.Flags = 0;
+        sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+        sd.OutputWindow = hWnd;
+        sd.SampleDesc.Count = 1;
+        sd.SampleDesc.Quality = 0;
+        sd.Windowed = TRUE;
+        sd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+
+        IDXGIDevice* dxgiDev = nullptr;
+        IDXGIAdapter* adapter = nullptr;
+        IDXGIFactory* factory = nullptr;
+        if (SUCCEEDED(g_pd3dDevice->QueryInterface(__uuidof(IDXGIDevice), (void**)&dxgiDev)) &&
+            SUCCEEDED(dxgiDev->GetAdapter(&adapter)) &&
+            SUCCEEDED(adapter->GetParent(__uuidof(IDXGIFactory), (void**)&factory))) {
+            if (FAILED(factory->CreateSwapChain(g_pd3dDevice, &sd, &g_pSwapChain))) {
+                factory->Release(); adapter->Release(); dxgiDev->Release();
+                return false;
+            }
+            factory->Release(); adapter->Release(); dxgiDev->Release();
+        } else {
+            return false;
+        }
+        // 限制帧延迟（退回路径）
+        IDXGIDevice1* dxgiDev1 = nullptr;
+        if (SUCCEEDED(g_pd3dDevice->QueryInterface(__uuidof(IDXGIDevice1), (void**)&dxgiDev1))) {
+            dxgiDev1->SetMaximumFrameLatency(1);
+            dxgiDev1->Release();
+        }
+    }
 
     CreateRenderTarget();
     return true;
@@ -71,6 +156,8 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     {
         if (wParam == 1) { // 我们注册的热键 ID
             g_overlayVisible = !g_overlayVisible;
+            // 根据叠加层可见性切换窗口显示状态，隐藏时不参与合成
+            ShowWindow(hWnd, g_overlayVisible ? SW_SHOWNOACTIVATE : SW_HIDE);
             return 0;
         }
     }
@@ -112,6 +199,7 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         // 作为备用：窗口聚焦时也可用
         if ((int)wParam == g_toggleKeyVk) {
             g_overlayVisible = !g_overlayVisible;
+            ShowWindow(hWnd, g_overlayVisible ? SW_SHOWNORMAL : SW_HIDE);
             return 0;
         }
         break;
