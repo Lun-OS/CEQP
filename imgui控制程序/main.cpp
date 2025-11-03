@@ -75,7 +75,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+    // 禁用游戏手柄导航，减少输入处理与后台轮询开销
+    // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 
     // 设置 ImGui 样式和主题
     ImGui::StyleColorsDark();
@@ -97,15 +98,27 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
     appUI.languageSelection = g_initialLanguage;
     appUI.themeSelection = g_imguiTheme;
     bool done = false;
+    // 记录虚拟屏几何与可见状态，避免每帧重复 SetWindowPos/ShowWindow
+    int last_vx = GetSystemMetrics(SM_XVIRTUALSCREEN);
+    int last_vy = GetSystemMetrics(SM_YVIRTUALSCREEN);
+    int last_vw = GetSystemMetrics(SM_CXVIRTUALSCREEN);
+    int last_vh = GetSystemMetrics(SM_CYVIRTUALSCREEN);
+    bool last_overlay_visible = g_overlayVisible;
 
     // 主循环
     while (!done) {
-        // 动态维持虚拟屏覆盖
+        auto frameStart = std::chrono::steady_clock::now();
+        // 仅在虚拟屏参数变化或叠加层从隐藏切换为可见时更新窗口到全屏覆盖
         int nvx = GetSystemMetrics(SM_XVIRTUALSCREEN);
         int nvy = GetSystemMetrics(SM_YVIRTUALSCREEN);
         int nvw = GetSystemMetrics(SM_CXVIRTUALSCREEN);
         int nvh = GetSystemMetrics(SM_CYVIRTUALSCREEN);
-        ::SetWindowPos(hwnd, HWND_TOPMOST, nvx, nvy, nvw, nvh, 0);
+        bool screen_changed = nvx != last_vx || nvy != last_vy || nvw != last_vw || nvh != last_vh;
+        if (screen_changed || (!last_overlay_visible && g_overlayVisible)) {
+            ::SetWindowPos(hwnd, HWND_TOPMOST, nvx, nvy, nvw, nvh,
+                           SWP_NOACTIVATE | SWP_NOSENDCHANGING);
+            last_vx = nvx; last_vy = nvy; last_vw = nvw; last_vh = nvh;
+        }
 
         // 处理 Win32 消息
         MSG msg;
@@ -116,6 +129,18 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
                 done = true;
         }
         if (done) break;
+
+        // 当叠加层不可见时，停止渲染并等待消息，避免忙轮询占用 CPU
+        if (!g_overlayVisible) {
+            // 确保窗口隐藏，减少 DWM 合成负担
+            ShowWindow(hwnd, SW_HIDE);
+            // 阻塞等待下一条消息（热键/退出等），CPU 几乎为零占用
+            WaitMessage();
+            continue;
+        } else if (!last_overlay_visible && g_overlayVisible) {
+            // 叠加层刚变为可见时显示并允许交互
+            ShowWindow(hwnd, SW_SHOWNORMAL);
+        }
 
         // 心跳保活检测
         if (appUI.isConnected) {
@@ -148,8 +173,30 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
         if (g_overlayVisible) {
             ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
         }
+        // 若启用了帧等待对象，则在呈现前等待，避免CPU忙等
+        if (g_overlayVisible && g_frameLatencyWaitableObject) {
+            HANDLE h = g_frameLatencyWaitableObject;
+            // 同时响应系统消息，避免阻塞消息泵
+            MsgWaitForMultipleObjects(1, &h, FALSE, 16, QS_ALLEVENTS);
+        }
+        // 当窗口被遮挡/最小化时 Present 可能返回 DXGI_STATUS_OCCLUDED
+        // 关闭VSync并根据支持情况启用撕裂呈现，减少对其他进程的影响
+        UINT presentFlags = g_dxgiAllowTearing ? DXGI_PRESENT_ALLOW_TEARING : 0;
+        HRESULT hrPresent = g_pSwapChain->Present(0, presentFlags);
+        if (hrPresent == DXGI_STATUS_OCCLUDED) {
+            // 轻微休眠，避免在遮挡状态下忙循环占用 CPU
+            Sleep(10);
+        } else {
+            // 在可见时限制帧率为 60FPS，兼顾流畅度与占用
+            const int targetFrameMs = 16;
+            auto frameEnd = std::chrono::steady_clock::now();
+            int elapsedMs = (int)std::chrono::duration_cast<std::chrono::milliseconds>(frameEnd - frameStart).count();
+            int sleepMs = targetFrameMs - elapsedMs;
+            if (sleepMs > 0) Sleep(sleepMs);
+        }
 
-        g_pSwapChain->Present(1, 0); // 垂直同步
+        // 更新上一次可见状态（避免重复 ShowWindow/SetWindowPos）
+        last_overlay_visible = g_overlayVisible;
     }
 
     // 清理资源
