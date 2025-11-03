@@ -18,6 +18,9 @@ extern ID3D11Device* g_pd3dDevice;
 extern ID3D11DeviceContext* g_pd3dDeviceContext;
 extern IDXGISwapChain* g_pSwapChain;
 extern ID3D11RenderTargetView* g_mainRenderTargetView;
+// 帧等待对象与撕裂支持（DXGI FLIP 模式优化）
+extern HANDLE g_frameLatencyWaitableObject;
+extern bool   g_dxgiAllowTearing;
 
 // 全局 UI/设置状态声明
 extern bool g_overlayVisible;             // 叠加层是否显示（F7 切换）
@@ -27,6 +30,7 @@ extern HANDLE g_singleInstanceMutex;     // 单实例互斥
 extern std::chrono::steady_clock::time_point g_notifyUntil; // 单实例提示到期时间
 extern bool g_initialPosApplied;         // 是否已应用初始位置
 extern ImVec2 g_lastUiPos;               // 最近一次 UI 位置
+extern ImVec2 g_lastUiSize;              // 最近一次 UI 尺寸
 extern int g_savedPosX;                  // 保存的 UI X
 extern int g_savedPosY;                  // 保存的 UI Y
 extern int g_imguiTheme;                 // 主题：0 Dark,1 Light,2 Classic,3 Corporate Gray,4 Cherry
