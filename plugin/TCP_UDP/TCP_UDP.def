@@ -1,0 +1,5 @@
+LIBRARY TCP_UDP
+EXPORTS
+    CEPlugin_GetVersion
+    CEPlugin_InitializePlugin
+    CEPlugin_DisablePlugin

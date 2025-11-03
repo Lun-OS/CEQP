@@ -1,0 +1,508 @@
+# Chinese (Simplified) translations for CEQP Control Program
+# Save this file as UTF-8 (no BOM)
+
+# --- Connection Panel ---
+msgid "Server Address:"
+msgstr "服务器地址:"
+
+msgid "Port:"
+msgstr "端口:"
+
+msgid "Connect"
+msgstr "连接"
+
+msgid "Connecting to "
+msgstr "正在连接到 "
+
+msgid "Connected successfully"
+msgstr "连接成功"
+
+msgid "Connection failed: "
+msgstr "连接失败："
+
+msgid "Disconnect"
+msgstr "断开连接"
+
+msgid "Disconnected"
+msgstr "已断开"
+
+msgid "Test Connection"
+msgstr "测试连接"
+
+msgid "Ping test successful"
+msgstr "Ping 测试成功"
+
+msgid "Ping test failed: "
+msgstr "Ping 测试失败："
+
+msgid "Connected"
+msgstr "已连接"
+
+# --- Memory Tab ---
+msgid "Memory Address:"
+msgstr "内存地址:"
+
+msgid "(Supports 0x prefix for hex)"
+msgstr "（支持 0x 十六进制前缀）"
+
+msgid "Data Length:"
+msgstr "数据长度:"
+
+msgid "Read Memory"
+msgstr "读取内存"
+
+msgid "Write Value:"
+msgstr "写入值:"
+
+msgid "Value:"
+msgstr "值:"
+
+msgid "Write Memory"
+msgstr "写入内存"
+
+
+# --- Settings Tab ---
+msgid "Settings"
+msgstr "设置"
+
+msgid "Language"
+msgstr "语言"
+
+msgid "Failed to load zh-cn.po under Language folder"
+msgstr "未能加载 Language 文件夹中的 zh-cn.po"
+
+msgid "Chinese translations loaded"
+msgstr "中文翻译已加载"
+
+msgid "English (default)"
+msgstr "英语（默认）"
+
+# Settings actions
+msgid "Exit"
+msgstr "退出"
+
+# --- Pointer Chain Tab ---
+msgid "Base Address:"
+msgstr "基址:"
+
+msgid "(e.g: libEngine.dll+013781B0 or 0x50000000)"
+msgstr "（例如：libEngine.dll+013781B0 或 0x50000000）"
+
+msgid "Offset Count:"
+msgstr "偏移层数:"
+
+msgid "Offset Chain:"
+msgstr "偏移链:"
+
+msgid "Pointer Size:"
+msgstr "指针大小:"
+
+msgid "Auto"
+msgstr "自动"
+
+msgid "4-byte"
+msgstr "4 字节"
+
+msgid "8-byte"
+msgstr "8 字节"
+
+msgid "No deref at last step"
+msgstr "最后一层不解引用"
+
+msgid "Read Pointer Chain"
+msgstr "读取指针链"
+
+msgid "Write Pointer Chain"
+msgstr "写入指针链"
+
+msgid "Write failed: "
+msgstr "写入失败："
+
+msgid "Parse error: "
+msgstr "解析错误："
+
+# 日志消息翻译
+msgid "Disconnected from server"
+msgstr "已断开与服务器的连接"
+
+msgid "Connected to "
+msgstr "已连接到 "
+
+msgid "Failed to connect: "
+msgstr "连接失败："
+
+msgid "Connection lost (ping failed)"
+msgstr "连接丢失（ping失败）"
+
+msgid "Read "
+msgstr "读取了 "
+
+msgid " bytes from 0x"
+msgstr " 字节，地址：0x"
+
+msgid "Read failed: "
+msgstr "读取失败："
+
+msgid "Wrote "
+msgstr "写入了 "
+
+msgid " bytes to 0x"
+msgstr " 字节，地址：0x"
+
+msgid "Base address: 0x"
+msgstr "基址：0x"
+
+msgid "Failed to get module base: "
+msgstr "获取模块基址失败："
+
+msgid "Auto pointer-size via process arch: "
+msgstr "通过进程架构自动检测指针大小："
+
+msgid "ptr32 (WOW64)"
+msgstr "ptr32 (WOW64)"
+
+msgid "ptr64"
+msgstr "ptr64"
+
+msgid "Auto pointer-size via baseAddr heuristic: "
+msgstr "通过基址启发式自动检测指针大小："
+
+msgid "ptr32"
+msgstr "ptr32"
+
+msgid "Pointer-chain DTYPE: "
+msgstr "指针链数据类型："
+
+msgid "Successfully wrote "
+msgstr "成功写入了 "
+
+msgid " bytes to pointer chain"
+msgstr " 字节到指针链"
+
+msgid "Path: "
+msgstr "路径："
+
+msgid "Pointer chain read failed: "
+msgstr "指针链读取失败："
+
+msgid "ERROR parsing input: "
+msgstr "输入解析错误："
+
+msgid "Failed to get module base for: "
+msgstr "获取模块基址失败："
+
+msgid "Module "
+msgstr "模块 "
+
+msgid " base: 0x"
+msgstr " 基址：0x"
+
+msgid "Heartbeat failed: "
+msgstr "心跳检测失败："
+
+msgid "Connecting to "
+msgstr "正在连接到 "
+
+msgid "Connected successfully"
+msgstr "连接成功"
+
+msgid "Connection failed: "
+msgstr "连接失败："
+
+msgid "Disconnected"
+msgstr "已断开连接"
+
+msgid "Ping test successful"
+msgstr "Ping测试成功"
+
+msgid "Ping test failed: "
+msgstr "Ping测试失败："
+
+msgid "Data length too large (max 1MB)"
+msgstr "数据长度过大（最大1MB）"
+
+msgid "Reading memory 0x"
+msgstr "正在读取内存 0x"
+
+msgid "Read successful: "
+msgstr "读取成功："
+
+msgid " bytes"
+msgstr " 字节"
+
+msgid "Parameter parsing error: "
+msgstr "参数解析错误："
+
+msgid "No data to write"
+msgstr "没有要写入的数据"
+
+msgid "Write success: "
+msgstr "写入成功："
+
+msgid "Write failed: "
+msgstr "写入失败："
+
+msgid "Server pointer-chain read failed, trying local fallback..."
+msgstr "服务器指针链读取失败，尝试本地回退..."
+
+msgid "Local read base pointer failed at 0x"
+msgstr "本地读取基指针失败，地址：0x"
+
+msgid "Final address invalid: 0x"
+msgstr "最终地址无效：0x"
+
+msgid "Local read final data failed: "
+msgstr "本地读取最终数据失败："
+
+msgid "Pointer chain BROKEN at step "
+msgstr "指针链在步骤 "
+
+msgid ": readAddr too low (0x"
+msgstr " 处断开：读取地址过低 (0x"
+
+msgid "Local read failed at step "
+msgstr "本地读取在步骤 "
+
+msgid ": "
+msgstr " 处失败："
+
+msgid " (NULL or too low)"
+msgstr " （空指针或地址过低）"
+
+msgid "Local fallback failed to read final data: "
+msgstr "本地回退读取最终数据失败："
+
+msgid "Local fallback success: read "
+msgstr "本地回退成功：读取了 "
+
+msgid "Pointer chain BROKEN at intermediate step!"
+msgstr "指针链在中间步骤断开！"
+
+msgid "This usually means:"
+msgstr "这通常意味着："
+
+msgid "  1. The object hasn't been created yet"
+msgstr "  1. 对象尚未创建"
+
+msgid "  2. The object was destroyed"
+msgstr "  2. 对象已被销毁"
+
+msgid "  3. Wrong offset values"
+msgstr "  3. 偏移值错误"
+
+msgid "Server message: "
+msgstr "服务器消息："
+
+# --- Log Tab ---
+msgid "Clear Log"
+msgstr "清空日志"
+
+msgid "Auto Scroll"
+msgstr "自动滚动"
+
+msgid "Log Count:"
+msgstr "日志条数:"
+
+# --- Main Window & Tabs ---
+msgid "CEQP Control Program"
+msgstr "CEQP 控制程序"
+
+msgid "Memory"
+msgstr "内存"
+
+msgid "Program already running"
+msgstr "程序已在运行中"
+
+# 主题切换
+msgid "Theme"
+msgstr "主题"
+msgid "Dark"
+msgstr "深色"
+msgid "Light"
+msgstr "浅色"
+msgid "Cold Purple"
+msgstr "冷酷紫"
+msgid "Corporate Gray"
+msgstr "企业灰"
+msgid "Warning Red"
+msgstr "警告红"
+
+msgid "Pointer Chain"
+msgstr "指针链"
+
+msgid "Log"
+msgstr "日志"
+
+# --- About Window ---
+msgid "About"
+msgstr "关于"
+
+msgid "Version: 1.0"
+msgstr "版本：1.0"
+
+msgid "Cheat Engine TCP_UDP Plugin Client based on CEQP Protocol"
+msgstr "基于 CEQP 协议的 Cheat Engine TCP_UDP 插件客户端"
+
+msgid "Supports memory read/write and pointer chain parsing"
+msgstr "支持内存读写以及指针链解析"
+# --- Write Types (Memory Tab) ---
+msgid "Binary Bytes"
+msgstr "二进制字节"
+
+msgid "2-byte"
+msgstr "2 字节"
+
+msgid "4-byte"
+msgstr "4 字节"
+
+msgid "8-byte"
+msgstr "8 字节"
+
+msgid "Float32"
+msgstr "单浮点"
+
+msgid "Float64"
+msgstr "双浮点"
+
+# --- Data Types ---
+msgid "Hex bytes"
+msgstr "十六进制字节"
+
+msgid "UInt8"
+msgstr "无符号8位"
+
+msgid "UInt16"
+msgstr "无符号16位"
+
+msgid "UInt32"
+msgstr "无符号32位"
+
+msgid "UInt64"
+msgstr "无符号64位"
+
+msgid "Int8"
+msgstr "有符号8位"
+
+msgid "Int16"
+msgstr "有符号16位"
+
+msgid "Int32"
+msgstr "有符号32位"
+
+msgid "Int64"
+msgstr "有符号64位"
+
+msgid "Float"
+msgstr "单精度浮点"
+
+msgid "Double"
+msgstr "双精度浮点"
+
+msgid "Dec"
+msgstr "十进制"
+
+msgid "Hex"
+msgstr "十六进制"
+
+msgid "Hex Integer"
+msgstr "十六进制"
+# --- Shared Data Display ---
+msgid "Data (Hex):"
+msgstr "数据（十六进制）："
+
+msgid "Data Parse:"
+msgstr "数据解析："
+
+# --- Settings: Hotkey & Font ---
+msgid "Overlay Hotkey"
+msgstr "叠加层快捷键"
+
+msgid "Font Size"
+msgstr "字体大小"
+
+msgid "Default Font"
+msgstr "默认字体"
+
+msgid "System (auto)"
+msgstr "系统（自动）"
+
+msgid "System (choose)"
+msgstr "系统（指定）"
+
+msgid "Folder (font/)"
+msgstr "文件夹（font/）"
+
+msgid "System: Microsoft YaHei"
+msgstr "系统：微软雅黑"
+
+msgid "System: SimHei"
+msgstr "系统：黑体"
+
+# --- Missing translations added ---
+msgid "Server:"
+msgstr "服务器："
+
+msgid "Address:"
+msgstr "地址："
+
+msgid "Length:"
+msgstr "长度："
+
+msgid "Write Type:"
+msgstr "写入类型："
+
+msgid "Language:"
+msgstr "语言："
+
+msgid "Theme:"
+msgstr "主题："
+
+msgid "Hotkey Settings:"
+msgstr "热键设置："
+
+msgid "Toggle Overlay"
+msgstr "切换叠加层"
+
+msgid "Not connected to server"
+msgstr "未连接到服务器"
+
+msgid "(e.g: 0x50000000 or libEngine.dll+013781B0)"
+msgstr "（例如：0x50000000 或 libEngine.dll+013781B0）"
+
+# 截图保护
+msgid "Exclude from screen capture"
+msgstr "禁止截图（黑屏）"
+
+msgid "NVIDIA capture compatibility"
+msgstr "NVIDIA 截图兼容模式（允许 NVIDIA 工具截图）"
+
+msgid "System: SimSun"
+msgstr "系统：宋体"
+
+msgid "System: DengXian"
+msgstr "系统：等线"
+
+msgid "Font file name under font/"
+msgstr "font/ 下的字体文件名"
+
+msgid "Apply Font"
+msgstr "应用字体"
+
+msgid "Save Settings"
+msgstr "保存设置"
+
+#------而外新增-----
+msgid "Tips"
+msgstr "提示"
+
+msgid "Dec"
+msgstr "十进制"
+
+msgid "Hex"
+msgstr "十六进制"
+
+msgid "Author: Lun. | GitHub: Lun-OS | QQ: 1596534228 | Open Source License: MIT"
+msgstr "作者：Lun | GitHub：Lun-OS | QQ：1596534228 | 开源许可证：MIT"
+
+msgid "The pointer order in Cheat Engine is from bottom to top, be careful to distinguish it."
+msgstr "cheat engine的指针顺序是从下到上的，注意分辨"
